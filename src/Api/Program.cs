@@ -7,6 +7,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
 using System.IO;
+using Microsoft.AspNetCore.HttpOverrides;
+using Api.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -54,7 +56,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("Default", policy =>
     {
-        policy.WithOrigins("http://localhost:3000", "http://localhost:5173")
+        policy.WithOrigins("http://localhost:3000", "http://phuhuynh.hub.edu.vn", "https://phuhuynh.hub.edu.vn")
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
@@ -87,9 +89,25 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization();
 builder.Services.AddScoped<IScoreQueryService, ScoreQueryService>();
 
+// Configure for IIS deployment
+builder.WebHost.UseIIS();
+
+// Cấu hình để nhận diện header từ reverse proxy (Cloudflare, Nginx)
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders =
+        ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+});
+
 var app = builder.Build();
 
-// Swagger/OpenAPI chỉ bật trong môi trường Development
+app.UseMiddleware<IpWhitelistMiddleware>();
+
+// Middleware này PHẢI được gọi trước UseHttpsRedirection()
+// Nó đọc các header X-Forwarded-* và cập nhật HttpContext cho đúng
+app.UseForwardedHeaders();
+
+// Swagger/OpenAPI is only enabled in the Development environment
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -100,12 +118,17 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseHttpsRedirection();
+// Use static files
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
+// Enable CORS
 app.UseCors("Default");
+
+app.UseHttpsRedirection();
+
 app.UseAuthentication();
 app.UseAuthorization();
-
-// Truy cập nhanh Swagger chỉ ở Development (đã cấu hình RoutePrefix 'swagger')
 
 app.MapControllers();
 
