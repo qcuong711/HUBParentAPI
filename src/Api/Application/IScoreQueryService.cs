@@ -7,4 +7,5 @@ namespace Api.Application;
 public interface IScoreQueryService
 {
     Task<IReadOnlyList<DetailedStudyUnitScoreDto>> GetStudyUnitScoresDetailedAsync(string studentCode);
+    Task<IReadOnlyList<ComponentScoreDto>> GetComponentScoresAsync(string studentCode, string? yearStudy, string? termId);
 }

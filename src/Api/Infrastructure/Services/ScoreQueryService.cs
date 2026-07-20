@@ -63,4 +63,47 @@ public class ScoreQueryService : IScoreQueryService
             throw new InvalidOperationException($"Lỗi ánh xạ dữ liệu khi truy vấn điểm chi tiết: {ex.Message}", ex);
         }
     }
+
+    public async Task<IReadOnlyList<ComponentScoreDto>> GetComponentScoresAsync(
+        string studentCode,
+        string? yearStudy,
+        string? termId)
+    {
+        var query =
+            from score in _db.StudentStudyUnitAssignments.AsNoTracking()
+            where score.StudentID == studentCode
+            join studyUnit in _db.StudyUnits.AsNoTracking()
+                on score.StudyUnitID equals studyUnit.StudyUnitID
+            join curriculum in _db.Curriculums.AsNoTracking()
+                on studyUnit.CurriculumID equals curriculum.CurriculumID into curriculumJoin
+            from curriculum in curriculumJoin.DefaultIfEmpty()
+            join assignment in _db.Assignments.AsNoTracking()
+                on score.AssignmentID equals assignment.AssignmentID into assignmentJoin
+            from assignment in assignmentJoin.DefaultIfEmpty()
+            join term in _db.Terms.AsNoTracking()
+                on new { studyUnit.YearStudy, studyUnit.TermID }
+                equals new { term.YearStudy, term.TermID } into termJoin
+            from term in termJoin.DefaultIfEmpty()
+            where (yearStudy == null || studyUnit.YearStudy == yearStudy)
+                && (termId == null || studyUnit.TermID == termId)
+            orderby studyUnit.YearStudy, term.OrderTerm, curriculum.CurriculumName, assignment.AssignmentName
+            select new ComponentScoreDto
+            {
+                StudentID = score.StudentID,
+                YearStudy = studyUnit.YearStudy,
+                TermID = studyUnit.TermID,
+                StudyUnitID = score.StudyUnitID,
+                ScheduleStudyUnitID = score.ScheduleStudyUnitID,
+                CurriculumID = studyUnit.CurriculumID,
+                CurriculumName = curriculum.CurriculumName,
+                AssignmentID = score.AssignmentID,
+                AssignmentName = assignment.AssignmentName,
+                Abbreviation = assignment.Abbreviation,
+                FirstMark = score.FirstMark,
+                SecondMark = score.SecondMark,
+                UpdateDate = score.UpdateDate
+            };
+
+        return await query.ToListAsync();
+    }
 }

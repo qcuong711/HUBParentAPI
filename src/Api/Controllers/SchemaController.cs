@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Api.Infrastructure.Persistence;
 
@@ -7,7 +6,6 @@ namespace Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
 public class SchemaController : ControllerBase
 {
     private readonly AppDbContext _db;

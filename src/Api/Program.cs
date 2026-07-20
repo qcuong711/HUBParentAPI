@@ -2,14 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using Api.Infrastructure.Persistence;
 using Api.Application;
 using Api.Infrastructure.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using Microsoft.OpenApi.Models;
 using System.IO;
-using Microsoft.AspNetCore.HttpOverrides;
-using Api.Middleware;
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
@@ -22,29 +16,6 @@ builder.Services.AddSwaggerGen(c =>
     {
         c.IncludeXmlComments(xmlPath, includeControllerXmlComments: true);
     }
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Description = "JWT Authorization header dùng schema Bearer. Ví dụ: Bearer {token}",
-        Name = "Authorization",
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.Http,
-        Scheme = "bearer",
-        BearerFormat = "JWT"
-    });
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            Array.Empty<string>()
-        }
-    });
 });
 
 builder.Services.AddDbContext<Api.Infrastructure.Persistence.AppDbContext>(options =>
@@ -56,59 +27,25 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("Default", policy =>
     {
-        policy.WithOrigins("http://localhost:3000", "http://phuhuynh.hub.edu.vn", "https://phuhuynh.hub.edu.vn")
+        policy.WithOrigins("http://localhost:3000", "http://localhost:3001", "http://localhost:3002", "http://phuhuynh.hub.edu.vn", "https://phuhuynh.hub.edu.vn")
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
 });
 
-// JWT Auth
-var jwtSection = builder.Configuration.GetSection("Jwt");
-var issuer = jwtSection["Issuer"] ?? "ApiParent";
-var audience = jwtSection["Audience"] ?? "ApiParentClients";
-var key = jwtSection["Key"] ?? "dev-key-change-me";
-var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
-
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = issuer,
-        ValidAudience = audience,
-        IssuerSigningKey = signingKey,
-        ClockSkew = TimeSpan.FromMinutes(2)
-    };
-});
-builder.Services.AddAuthorization();
 builder.Services.AddScoped<IScoreQueryService, ScoreQueryService>();
-
-// Configure for IIS deployment
-builder.WebHost.UseIIS();
-
-// Cấu hình để nhận diện header từ reverse proxy (Cloudflare, Nginx)
-builder.Services.Configure<ForwardedHeadersOptions>(options =>
-{
-    options.ForwardedHeaders =
-        ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-});
+builder.Services.AddScoped<IStudentQueryService, StudentQueryService>();
+builder.Services.AddScoped<IScheduleQueryService, ScheduleQueryService>();
 
 var app = builder.Build();
 
-app.UseMiddleware<IpWhitelistMiddleware>();
+// Enable Swagger for all development-style environments (Development, Dev*, Local).
+var isDevelopmentEnvironment =
+    app.Environment.IsDevelopment()
+    || app.Environment.EnvironmentName.StartsWith("Dev", StringComparison.OrdinalIgnoreCase)
+    || app.Environment.IsEnvironment("Local");
 
-// Middleware này PHẢI được gọi trước UseHttpsRedirection()
-// Nó đọc các header X-Forwarded-* và cập nhật HttpContext cho đúng
-app.UseForwardedHeaders();
-
-// Swagger/OpenAPI is only enabled in the Development environment
-if (app.Environment.IsDevelopment())
+if (isDevelopmentEnvironment)
 {
     app.UseSwagger();
     app.UseSwaggerUI(c =>
@@ -116,6 +53,7 @@ if (app.Environment.IsDevelopment())
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "APIParent v1");
         c.RoutePrefix = "swagger";
     });
+    app.MapGet("/", () => Results.Redirect("/swagger")).ExcludeFromDescription();
 }
 
 // Use static files
@@ -125,10 +63,6 @@ app.UseStaticFiles();
 // Enable CORS
 app.UseCors("Default");
 
-app.UseHttpsRedirection();
-
-app.UseAuthentication();
-app.UseAuthorization();
 
 app.MapControllers();
 

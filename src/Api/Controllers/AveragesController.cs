@@ -2,13 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 using Api.Infrastructure.Persistence;
 using Api.Application.Dtos;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authorization;
 
 namespace Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-//[Authorize]
 public class AveragesController : ControllerBase
 {
     private readonly AppDbContext _db;
@@ -81,5 +79,71 @@ public class AveragesController : ControllerBase
             })
             .FirstOrDefaultAsync();
         return Ok(x);
+    }
+
+    /// <summary>
+    /// Gets graduation progress for each study program of the student.
+    /// </summary>
+    [HttpGet("graduation/{studentCode}")]
+    public async Task<IActionResult> GetGraduationProgress(string studentCode)
+    {
+        var rows = await (
+            from graduation in _db.StudentAverageScoresGraduation.AsNoTracking()
+            where graduation.StudentID == studentCode
+            join program in _db.StudyPrograms.AsNoTracking()
+                on graduation.StudyProgramID equals program.StudyProgramID into programJoin
+            from program in programJoin.DefaultIfEmpty()
+            select new
+            {
+                graduation.StudentID,
+                graduation.StudyProgramID,
+                program.StudyProgramName,
+                graduation.MandatoryCredits,
+                graduation.MandatoryGatherCredits,
+                graduation.SelectiveCredits,
+                graduation.SelectiveGatherCredits,
+                graduation.NumberOfCurriculumFails,
+                graduation.NumberOfCreditsFails,
+                AverageGatherScore10 = graduation.AverageGatherScore,
+                graduation.AverageGatherScore4,
+                graduation.UpdateDate
+            })
+            .ToListAsync();
+
+        var list = rows.Select(x =>
+        {
+            var mandatoryCredits = x.MandatoryCredits ?? 0;
+            var selectiveCredits = x.SelectiveCredits ?? 0;
+            var mandatoryGatherCredits = x.MandatoryGatherCredits ?? 0;
+            var selectiveGatherCredits = x.SelectiveGatherCredits ?? 0;
+            var requiredCredits = mandatoryCredits + selectiveCredits;
+            var completedCredits = mandatoryGatherCredits + selectiveGatherCredits;
+            var remainingCredits = Math.Max(requiredCredits - completedCredits, 0);
+            decimal? progressPercent = requiredCredits > 0
+                ? Math.Min(Math.Round(completedCredits / requiredCredits * 100, 2), 100)
+                : null;
+
+            return new GraduationProgressDto
+            {
+                StudentID = x.StudentID!,
+                StudyProgramID = x.StudyProgramID,
+                StudyProgramName = x.StudyProgramName,
+                MandatoryCredits = x.MandatoryCredits,
+                MandatoryGatherCredits = x.MandatoryGatherCredits,
+                SelectiveCredits = x.SelectiveCredits,
+                SelectiveGatherCredits = x.SelectiveGatherCredits,
+                RequiredCredits = requiredCredits,
+                CompletedCredits = completedCredits,
+                RemainingCredits = remainingCredits,
+                ProgressPercent = progressPercent,
+                NumberOfCurriculumFails = x.NumberOfCurriculumFails,
+                NumberOfCreditsFails = x.NumberOfCreditsFails,
+                AverageGatherScore10 = x.AverageGatherScore10,
+                AverageGatherScore4 = x.AverageGatherScore4,
+                UpdateDate = x.UpdateDate
+            };
+        }).ToList();
+
+        return Ok(list);
     }
 }

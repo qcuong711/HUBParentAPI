@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>APIParent Swagger UI</title>
+  <!--
+    Trang Swagger UI giúp đội dev/test xem danh sách API và thử gọi trực tiếp.
+    Nguồn dữ liệu là file JSON OpenAPI sinh tại endpoint /openapi/v1.json (Development).
+    Khi chạy production, có thể tắt hoặc bảo vệ truy cập tuỳ nhu cầu bảo mật.
+  -->
+  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css">
+</head>
+<body>
+  <div id="swagger-ui"></div>
+  <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+  <script>
+    window.onload = () => {
+      SwaggerUIBundle({
+        url: "/openapi/v1.json",
+        dom_id: "#swagger-ui",
+        presets: [SwaggerUIBundle.presets.apis],
+        layout: "BaseLayout"
+      });
+    };
+  </script>
+</body>
+</html>
