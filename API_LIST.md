@@ -32,6 +32,12 @@ Swagger UI: `http://localhost:5183/swagger`
 | Sinh viên | GET | `/api/students/advisor/{studentCode}` | Thông tin liên hệ cố vấn học tập |
 | Lịch | GET | `/api/schedules/timetable/{studentCode}` | Thời khóa biểu; mặc định học kỳ hiện tại |
 | Lịch | GET | `/api/schedules/exams/{studentCode}` | Lịch thi/đồ án; mặc định học kỳ hiện tại |
+| Tài chính | GET | `/api/finance/tuition/terms/{studentCode}` | Tổng học phí, đã đóng, miễn giảm và còn nợ theo học kỳ |
+| Tài chính | GET | `/api/finance/tuition/courses/{studentCode}` | Chi tiết học phí theo môn hoặc khoản thu gộp theo kỳ |
+| Tài chính | GET | `/api/finance/other-fees/{studentCode}` | Các khoản phí khác và trạng thái thanh toán |
+| Tài chính | GET | `/api/finance/payments/{studentCode}` | Lịch sử biên lai và số tiền đã thanh toán |
+| Tài chính | GET | `/api/finance/debts/{studentCode}` | Danh sách các khoản học phí/lệ phí còn nợ |
+| Tài chính | GET | `/api/finance/deadlines/{studentCode}` | Hạn đóng chung và thời gian gia hạn riêng |
 | Schema | GET | `/api/schema/psc-tables` | Danh sách bảng PSC phục vụ kiểm tra schema |
 
 Các endpoint có hỗ trợ lọc nhận query string:
@@ -138,3 +144,85 @@ Với dữ liệu local hiện tại:
 - API lịch thi/đồ án trả 4 bản ghi.
 - Một số đồ án hoặc thực tập có thể chưa có ngày, giờ hoặc phòng nên các trường tương ứng trả `null`.
 
+
+## Ví dụ 6: Tổng hợp học phí theo học kỳ
+
+```http
+GET http://localhost:5183/api/finance/tuition/terms/030837210252
+```
+
+Có thể lọc một học kỳ cụ thể:
+
+```http
+GET http://localhost:5183/api/finance/tuition/terms/030837210252?yearStudy=2024-2025&termId=HK01
+```
+
+Response rút gọn:
+
+```json
+[
+  {
+    "studentID": "030837210252",
+    "yearStudy": "2024-2025",
+    "termID": "HK01",
+    "tuitionAmount": 5621000,
+    "paidAmount": 5621000,
+    "offsetAmount": 0,
+    "discountAmount": 0,
+    "remainingAmount": 0,
+    "isFullyPaid": true,
+    "paymentStatus": "PAID"
+  }
+]
+```
+
+## Ví dụ 7: Chi tiết học phí từng môn
+
+```http
+GET http://localhost:5183/api/finance/tuition/courses/030837210252?yearStudy=2024-2025&termId=HK01
+```
+
+- `isTermLevel=false`: khoản học phí xác định được môn/lớp học phần.
+- `isTermLevel=true`: khoản thu gộp theo học kỳ, không thể phân bổ chính xác cho từng môn.
+- `paymentStatus` có giá trị `PAID` hoặc `OUTSTANDING`.
+
+## Ví dụ 8: Các khoản phí khác
+
+```http
+GET http://localhost:5183/api/finance/other-fees/030837210252
+```
+
+Kết quả gồm loại phí, số phải thu, đã đóng, miễn giảm, cấn trừ và còn nợ.
+
+## Ví dụ 9: Lịch sử thanh toán
+
+```http
+GET http://localhost:5183/api/finance/payments/030837210252?yearStudy=2024-2025
+```
+
+API chỉ trả biên lai hợp lệ, tự loại biên lai đã hủy, đã rút hoặc thuộc nhóm nghiệp vụ không phải khoản thu thông thường.
+
+## Ví dụ 10: Các khoản còn nợ
+
+```http
+GET http://localhost:5183/api/finance/debts/010121160003
+```
+
+- `isTuition=true`: học phí.
+- `isTuition=false`: lệ phí hoặc khoản phí khác.
+- Nếu sinh viên không còn nợ, API trả `[]`.
+
+## Ví dụ 11: Hạn đóng và gia hạn
+
+```http
+GET http://localhost:5183/api/finance/deadlines/030126100558?yearStudy=2016-2017&termId=HK01
+```
+
+- `originalDeadline`: hạn đóng ban đầu.
+- `extensionEndDate`: hạn gia hạn riêng của sinh viên, nếu có.
+- `effectiveDeadline`: hạn cuối thực tế sau khi áp dụng gia hạn.
+- `isOverdue`: đã quá hạn tại thời điểm gọi API hay chưa.
+
+## Điều kiện kết nối dữ liệu tài chính
+
+Các API tài chính dùng connection `DefaultConnection` hiện có và truy vấn chéo sang database `[AccountsFee]` trên cùng SQL Server. Không cần thêm hoặc đổi connection string production, nhưng tài khoản SQL của API phải có quyền `SELECT` trên cả `CoreUis` và `AccountsFee`.

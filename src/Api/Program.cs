@@ -36,6 +36,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddScoped<IScoreQueryService, ScoreQueryService>();
 builder.Services.AddScoped<IStudentQueryService, StudentQueryService>();
 builder.Services.AddScoped<IScheduleQueryService, ScheduleQueryService>();
+builder.Services.AddScoped<IFinanceQueryService, FinanceQueryService>();
 
 var app = builder.Build();
 
