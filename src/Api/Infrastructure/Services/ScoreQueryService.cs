@@ -37,6 +37,7 @@ public class ScoreQueryService : IScoreQueryService
                 Mark10 = ssu.Mark10,
                 Mark4 = ssu.Mark4,
                 MarkLetter = ssu.MarkLetter,
+                IsPass = ssu.IsPass,
                 StudyUnitAlias = su.StudyUnitAlias,
                 YearStudy = su.YearStudy ?? sstat.YearStudy,
                 TermID = su.TermID ?? sstat.TermID,

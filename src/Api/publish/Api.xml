@@ -19,9 +19,74 @@
             Lấy tổng hợp điểm trung bình chung
             </summary>
         </member>
+        <member name="M:Api.Controllers.AveragesController.GetGraduationProgress(System.String)">
+            <summary>
+            Gets graduation progress for each study program of the student.
+            </summary>
+        </member>
+        <member name="M:Api.Controllers.FinanceController.GetTuitionTerms(System.String,System.String,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Tổng hợp học phí, đã đóng, miễn giảm và còn nợ theo học kỳ.
+            </summary>
+        </member>
+        <member name="M:Api.Controllers.FinanceController.GetTuitionCourses(System.String,System.String,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Chi tiết học phí theo môn; khoản thu gộp theo kỳ có isTermLevel=true.
+            </summary>
+        </member>
+        <member name="M:Api.Controllers.FinanceController.GetOtherFees(System.String,System.String,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Các khoản phí không phải học phí, cùng trạng thái thanh toán.
+            </summary>
+        </member>
+        <member name="M:Api.Controllers.FinanceController.GetPayments(System.String,System.String,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Lịch sử biên lai và các khoản đã thanh toán hợp lệ.
+            </summary>
+        </member>
+        <member name="M:Api.Controllers.FinanceController.GetDebts(System.String,System.String,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Các khoản học phí hoặc lệ phí vẫn còn nợ.
+            </summary>
+        </member>
+        <member name="M:Api.Controllers.FinanceController.GetDeadlines(System.String,System.String,System.String,System.Threading.CancellationToken)">
+            <summary>
+            Hạn đóng học phí chung và thời gian gia hạn riêng của sinh viên.
+            </summary>
+        </member>
+        <member name="M:Api.Controllers.SchedulesController.GetTimetable(System.String,System.String,System.String)">
+            <summary>
+            Gets the timetable; defaults to the current term.
+            </summary>
+        </member>
+        <member name="M:Api.Controllers.SchedulesController.GetExams(System.String,System.String,System.String)">
+            <summary>
+            Gets the exam or project schedule; defaults to the current term.
+            </summary>
+        </member>
         <member name="M:Api.Controllers.ScoresController.GetDetailedScores(System.String)">
             <summary>
             Lấy danh sách điểm chi tiết theo MSSV
+            </summary>
+        </member>
+        <member name="M:Api.Controllers.ScoresController.GetComponentScores(System.String,System.String,System.String)">
+            <summary>
+            Gets component scores, optionally filtered by academic year and term.
+            </summary>
+        </member>
+        <member name="M:Api.Controllers.StudentsController.GetRegistrations(System.String,System.String,System.String)">
+            <summary>
+            Gets registered courses and the student's total study load.
+            </summary>
+        </member>
+        <member name="M:Api.Controllers.StudentsController.GetStudyStatus(System.String,System.String,System.String)">
+            <summary>
+            Gets the latest study status and academic warning history.
+            </summary>
+        </member>
+        <member name="M:Api.Controllers.StudentsController.GetAdvisor(System.String,System.String,System.String)">
+            <summary>
+            Gets academic advisor contacts for the student's class.
             </summary>
         </member>
     </members>

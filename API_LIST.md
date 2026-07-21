@@ -76,6 +76,12 @@ Response rút gọn:
 ]
 ```
 
+The detailed study-unit score API returns `isPass` from the course-result data:
+
+- `true`: passed.
+- `false`: failed.
+- `null`: the result is not available or has not been determined.
+
 ## Ví dụ 3: Xem tải học tập
 
 ```http

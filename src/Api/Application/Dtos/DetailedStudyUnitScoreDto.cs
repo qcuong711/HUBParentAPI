@@ -17,5 +17,6 @@ public class DetailedStudyUnitScoreDto
     public decimal? Mark10 { get; set; }
     public decimal? Mark4 { get; set; }
     public string? MarkLetter { get; set; }
+    public bool? IsPass { get; set; }
 }
 

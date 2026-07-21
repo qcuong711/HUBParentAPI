@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Api</name>
+    </assembly>
+    <members>
+        <member name="M:Api.Controllers.AveragesController.GetByYear(System.String)">
+            <summary>
+            Lấy danh sách điểm trung bình theo năm học
+            </summary>
+        </member>
+        <member name="M:Api.Controllers.AveragesController.GetByTerms(System.String)">
+            <summary>
+            Lấy danh sách điểm trung bình tích lũy theo học kỳ
+            </summary>
+        </member>
+        <member name="M:Api.Controllers.AveragesController.GetOverall(System.String)">
+            <summary>
+            Lấy tổng hợp điểm trung bình chung
+            </summary>
+        </member>
+        <member name="M:Api.Controllers.ScoresController.GetDetailedScores(System.String)">
+            <summary>
+            Lấy danh sách điểm chi tiết theo MSSV
+            </summary>
+        </member>
+    </members>
+</doc>
