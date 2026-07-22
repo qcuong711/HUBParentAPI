@@ -11,6 +11,9 @@ public class GraduationCriteriaStudyProgram
     public bool? IsKTTiengAnhTangCuong { get; set; }
     public bool? IsKyNangMem { get; set; }
     public bool? IsNCKH { get; set; }
+    public bool? IsDefencePass { get; set; }
+    public bool? IsPhysicalPass { get; set; }
+    public bool? IsSinhHoatDauKhoaPass { get; set; }
     public DateTime ApplyDate { get; set; }
     public DateTime? UpdateDate { get; set; }
 }

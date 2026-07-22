@@ -17,7 +17,10 @@ public class GraduationStandardQueryService
         new("TH", "Tin học"),
         new("TATC", "Tiếng Anh tăng cường"),
         new("KNM", "Kỹ năng mềm"),
-        new("DK", "Nghiên cứu khoa học")
+        new("DK", "Nghiên cứu khoa học"),
+        new("PC", "Giáo dục thể chất"),
+        new("DC", "Giáo dục quốc phòng"),
+        new("SHDK", "Sinh hoạt đầu khóa")
     ];
 
     private readonly AppDbContext _db;
@@ -59,6 +62,9 @@ public class GraduationStandardQueryService
                 criteria.IsKTTiengAnhTangCuong,
                 criteria.IsKyNangMem,
                 criteria.IsNCKH,
+                criteria.IsDefencePass,
+                criteria.IsPhysicalPass,
+                criteria.IsSinhHoatDauKhoaPass,
                 criteria.ApplyDate,
                 criteria.UpdateDate
             FROM dbo.psc_GraduationCriteriaStudyPrograms criteria WITH (NOLOCK)
@@ -76,7 +82,7 @@ public class GraduationStandardQueryService
                 FROM dbo.psc_grd_StudentCertificates certificate WITH (NOLOCK)
                 WHERE certificate.StudentID = @StudentCode
                   AND certificate.IsHaveCertificate = 1
-                  AND certificate.CertificateTypeID IN ('NN', 'TH', 'TATC', 'KNM', 'DK')
+                  AND certificate.CertificateTypeID IN ('NN', 'TH', 'TATC', 'KNM', 'DK', 'PC', 'DC', 'SHDK')
 
                 UNION ALL
 
@@ -98,7 +104,7 @@ public class GraduationStandardQueryService
                 FROM dbo.psc_Grd_CertificateJudgeResult result WITH (NOLOCK)
                 WHERE result.StudentID = @StudentCode
                   AND result.Result = 1
-                  AND result.CertificateTypeID IN ('NN', 'TH', 'TATC', 'KNM', 'DK')
+                  AND result.CertificateTypeID IN ('NN', 'TH', 'TATC', 'KNM', 'DK', 'PC', 'DC', 'SHDK')
 
                 UNION ALL
 
@@ -119,6 +125,26 @@ public class GraduationStandardQueryService
                 FROM dbo.psc_GraduationResults result WITH (NOLOCK)
                 WHERE result.StudentID = @StudentCode
                   AND result.IsITCertificate = 1
+
+                UNION ALL
+
+                SELECT
+                    CONVERT(varchar(20), 'DC'),
+                    CONVERT(varchar(40), 'graduationReview'),
+                    result.JudgeDate
+                FROM dbo.psc_GraduationResults result WITH (NOLOCK)
+                WHERE result.StudentID = @StudentCode
+                  AND result.IsDefencePass = 1
+
+                UNION ALL
+
+                SELECT
+                    CONVERT(varchar(20), 'PC'),
+                    CONVERT(varchar(40), 'graduationReview'),
+                    result.JudgeDate
+                FROM dbo.psc_GraduationResults result WITH (NOLOCK)
+                WHERE result.StudentID = @StudentCode
+                  AND result.IsPhysicalPass = 1
             ) evidence;
             """;
 
@@ -164,6 +190,9 @@ public class GraduationStandardQueryService
                     IsKTTiengAnhTangCuong = GetNullableBoolean(reader, "IsKTTiengAnhTangCuong"),
                     IsKyNangMem = GetNullableBoolean(reader, "IsKyNangMem"),
                     IsNCKH = GetNullableBoolean(reader, "IsNCKH"),
+                    IsDefencePass = GetNullableBoolean(reader, "IsDefencePass"),
+                    IsPhysicalPass = GetNullableBoolean(reader, "IsPhysicalPass"),
+                    IsSinhHoatDauKhoaPass = GetNullableBoolean(reader, "IsSinhHoatDauKhoaPass"),
                     ApplyDate = GetDateTime(reader, "ApplyDate") ?? DateTime.MinValue,
                     UpdateDate = GetDateTime(reader, "UpdateDate")
                 };
@@ -268,6 +297,9 @@ public class GraduationStandardQueryService
             "TATC" => criteria.IsKTTiengAnhTangCuong == true,
             "KNM" => criteria.IsKyNangMem == true,
             "DK" => criteria.IsNCKH == true,
+            "PC" => criteria.IsPhysicalPass == true,
+            "DC" => criteria.IsDefencePass == true,
+            "SHDK" => criteria.IsSinhHoatDauKhoaPass == true,
             _ => false
         };
     }

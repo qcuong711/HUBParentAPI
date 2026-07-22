@@ -54,6 +54,11 @@
             Hạn đóng học phí chung và thời gian gia hạn riêng của sinh viên.
             </summary>
         </member>
+        <member name="M:Api.Controllers.GraduationStandardsController.Get(System.String,System.Threading.CancellationToken)">
+            <summary>
+            Gets the configured graduation standards and consolidated achievement evidence for a student.
+            </summary>
+        </member>
         <member name="M:Api.Controllers.SchedulesController.GetTimetable(System.String,System.String,System.String)">
             <summary>
             Gets the timetable; defaults to the current term.
