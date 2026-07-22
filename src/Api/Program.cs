@@ -37,6 +37,7 @@ builder.Services.AddScoped<IScoreQueryService, ScoreQueryService>();
 builder.Services.AddScoped<IStudentQueryService, StudentQueryService>();
 builder.Services.AddScoped<IScheduleQueryService, ScheduleQueryService>();
 builder.Services.AddScoped<IFinanceQueryService, FinanceQueryService>();
+builder.Services.AddScoped<GraduationStandardQueryService>();
 
 var app = builder.Build();
 
