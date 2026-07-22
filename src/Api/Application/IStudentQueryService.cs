@@ -6,5 +6,6 @@ public interface IStudentQueryService
 {
     Task<StudentRegistrationsDto> GetRegistrationsAsync(string studentCode, string? yearStudy, string? termId);
     Task<IReadOnlyList<StudentStudyStatusDto>> GetStudyStatusesAsync(string studentCode, string? yearStudy, string? termId);
+    Task<IReadOnlyList<StudentProgramDto>> GetProgramsAsync(string studentCode);
     Task<IReadOnlyList<AdvisorDto>> GetAdvisorsAsync(string studentCode, string? yearStudy, string? termId);
 }

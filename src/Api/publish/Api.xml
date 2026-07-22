@@ -84,6 +84,11 @@
             Gets the latest study status and academic warning history.
             </summary>
         </member>
+        <member name="M:Api.Controllers.StudentsController.GetPrograms(System.String)">
+            <summary>
+            Gets the student's study programs, majors, and specializations.
+            </summary>
+        </member>
         <member name="M:Api.Controllers.StudentsController.GetAdvisor(System.String,System.String,System.String)">
             <summary>
             Gets academic advisor contacts for the student's class.

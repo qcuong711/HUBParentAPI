@@ -20,6 +20,8 @@ public class AppDbContext : DbContext
     public DbSet<Curriculum> Curriculums => Set<Curriculum>();
     public DbSet<StudyUnit> StudyUnits => Set<StudyUnit>();
     public DbSet<StudyProgram> StudyPrograms => Set<StudyProgram>();
+    public DbSet<StudentStudyProgram> StudentStudyPrograms => Set<StudentStudyProgram>();
+    public DbSet<Ology> Ologies => Set<Ology>();
     public DbSet<StudentStudyStatus> StudentStudyStatuses => Set<StudentStudyStatus>();
     public DbSet<ClassStudent> ClassStudents => Set<ClassStudent>();
     public DbSet<StudyType> StudyTypes => Set<StudyType>();
@@ -108,6 +110,18 @@ public class AppDbContext : DbContext
             entity.HasKey(e => e.StudyProgramID);
         });
 
+        modelBuilder.Entity<StudentStudyProgram>(entity =>
+        {
+            entity.ToTable("psc1_StudentStudyPrograms");
+            entity.HasKey(e => new { e.StudentID, e.StudyProgramID });
+        });
+
+        modelBuilder.Entity<Ology>(entity =>
+        {
+            entity.ToTable("psc_Ologies");
+            entity.HasKey(e => e.OlogyID);
+        });
+
         modelBuilder.Entity<StudentStudyStatus>(entity =>
         {
             entity.ToTable("psc_StudentStudyStatus");
@@ -194,7 +208,7 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<Professor>(entity =>
         {
-            entity.ToTable("psc_Professors");
+            entity.ToTable("psc_Pro_Professors");
             entity.HasKey(e => e.ProfessorID);
         });
 

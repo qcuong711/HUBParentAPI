@@ -24,9 +24,9 @@ public class AveragesController : ControllerBase
             .Select(x => new YearStudyAverageDto
             {
                 YearStudy = x.YearStudy,
-                AverageScore10 = x.AverageScore10,
+                AverageScore10 = x.AverageScore10 ?? x.AverageScore,
                 AverageScore4 = x.AverageScore4,
-                AverageGatherScore10 = x.AverageGatherScore10,
+                AverageGatherScore10 = x.AverageGatherScore10 ?? x.AverageGatherScore,
                 AverageGatherScore4 = x.AverageGatherScore4,
                 UpdateDate = x.UpdateDate
             })

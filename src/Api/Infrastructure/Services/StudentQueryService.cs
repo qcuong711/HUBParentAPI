@@ -70,6 +70,41 @@ public class StudentQueryService : IStudentQueryService
         };
     }
 
+    public async Task<IReadOnlyList<StudentProgramDto>> GetProgramsAsync(string studentCode)
+    {
+        return await (
+            from studentProgram in _db.StudentStudyPrograms.AsNoTracking()
+            where studentProgram.StudentID == studentCode
+            join program in _db.StudyPrograms.AsNoTracking()
+                on studentProgram.StudyProgramID equals program.StudyProgramID
+            join major in _db.Ologies.AsNoTracking()
+                on program.OlogyID equals major.OlogyID into majorJoin
+            from major in majorJoin.DefaultIfEmpty()
+            orderby studentProgram.UpdateDate descending, program.StudyProgramName
+            select new StudentProgramDto
+            {
+                StudentID = studentProgram.StudentID,
+                StudyProgramID = studentProgram.StudyProgramID,
+                StudyProgramName = program.StudyProgramName,
+                MajorID = program.OlogyID,
+                MajorName = major.OlogyName,
+                SpecializationID = studentProgram.SpecializationID == null
+                    || studentProgram.SpecializationID == "[NA]"
+                    || studentProgram.SpecializationID == "[N/A]"
+                    || studentProgram.SpecializationID.Trim() == ""
+                        ? null
+                        : studentProgram.SpecializationID,
+                SpecializationName = major.SpecializationName == null
+                    || major.SpecializationName.Trim() == ""
+                        ? null
+                        : major.SpecializationName,
+                ProgramType = studentProgram.Type,
+                StudyStatus = studentProgram.StudyStatus,
+                UpdateDate = studentProgram.UpdateDate
+            })
+            .ToListAsync();
+    }
+
     public async Task<IReadOnlyList<StudentStudyStatusDto>> GetStudyStatusesAsync(
         string studentCode,
         string? yearStudy,

@@ -39,6 +39,15 @@ public class StudentsController : ControllerBase
     }
 
     /// <summary>
+    /// Gets the student's study programs, majors, and specializations.
+    /// </summary>
+    [HttpGet("programs/{studentCode}")]
+    public async Task<IActionResult> GetPrograms(string studentCode)
+    {
+        return Ok(await _service.GetProgramsAsync(studentCode));
+    }
+
+    /// <summary>
     /// Gets academic advisor contacts for the student's class.
     /// </summary>
     [HttpGet("advisor/{studentCode}")]

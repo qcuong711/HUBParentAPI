@@ -4,6 +4,7 @@ public class StudyProgram
 {
     public string StudyProgramID { get; set; } = default!;
     public string? StudyProgramName { get; set; }
+    public string OlogyID { get; set; } = default!;
     public string? StudyProgramEngName { get; set; }
 }
 
