@@ -6,5 +6,7 @@ public class StudyProgram
     public string? StudyProgramName { get; set; }
     public string OlogyID { get; set; } = default!;
     public string? StudyProgramEngName { get; set; }
+    public decimal? Credits { get; set; }
+    public decimal? MinGatherCredits { get; set; }
 }
 

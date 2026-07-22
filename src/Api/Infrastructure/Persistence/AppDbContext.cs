@@ -120,6 +120,7 @@ public class AppDbContext : DbContext
         {
             entity.ToTable("psc_Ologies");
             entity.HasKey(e => e.OlogyID);
+            entity.Property(e => e.ParentMajorID).HasColumnName("Parent");
         });
 
         modelBuilder.Entity<StudentStudyStatus>(entity =>

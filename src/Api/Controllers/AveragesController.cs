@@ -110,6 +110,73 @@ public class AveragesController : ControllerBase
             })
             .ToListAsync();
 
+        if (rows.Count == 0)
+        {
+            var studentPrograms = await (
+                from studentProgram in _db.StudentStudyPrograms.AsNoTracking()
+                where studentProgram.StudentID == studentCode
+                join program in _db.StudyPrograms.AsNoTracking()
+                    on studentProgram.StudyProgramID equals program.StudyProgramID
+                orderby studentProgram.UpdateDate descending, program.StudyProgramName
+                select new
+                {
+                    studentProgram.StudentID,
+                    studentProgram.StudyProgramID,
+                    program.StudyProgramName,
+                    program.Credits,
+                    program.MinGatherCredits
+                })
+                .ToListAsync();
+
+            var averages = await _db.StudentAverageScores.AsNoTracking()
+                .Where(x => x.StudentID == studentCode)
+                .OrderByDescending(x => x.UpdateDate)
+                .ToListAsync();
+
+            var activeProgress = studentPrograms.Select(program =>
+            {
+                var average = averages.FirstOrDefault(x => x.StudyProgramID == program.StudyProgramID);
+                var requiredCredits = program.MinGatherCredits is > 0
+                    ? program.MinGatherCredits.Value
+                    : program.Credits ?? 0;
+                var categorizedCompletedCredits = (average?.MandatoryGatherCredits ?? 0)
+                    + (average?.SelectiveGatherCredits ?? 0);
+                var completedCredits = categorizedCompletedCredits > 0
+                    ? categorizedCompletedCredits
+                    : average?.SumOfGatherCredits ?? 0;
+                var remainingCredits = Math.Max(requiredCredits - completedCredits, 0);
+                decimal? progressPercent = requiredCredits > 0
+                    ? Math.Min(Math.Round(completedCredits / requiredCredits * 100, 2), 100)
+                    : null;
+
+                return new GraduationProgressDto
+                {
+                    StudentID = program.StudentID,
+                    StudyProgramID = program.StudyProgramID,
+                    StudyProgramName = program.StudyProgramName,
+                    MandatoryCredits = average?.MandatoryCredits,
+                    MandatoryGatherCredits = average?.MandatoryGatherCredits,
+                    SelectiveCredits = average?.SelectiveCredits,
+                    SelectiveGatherCredits = average?.SelectiveGatherCredits,
+                    RequiredCredits = requiredCredits,
+                    CompletedCredits = completedCredits,
+                    RemainingCredits = remainingCredits,
+                    ProgressPercent = progressPercent,
+                    NumberOfCurriculumFails = average?.NumberOfCurriculumFails is decimal curriculumFails
+                        ? decimal.ToInt32(curriculumFails)
+                        : null,
+                    NumberOfCreditsFails = average?.NumberOfCreditsFails is decimal creditFails
+                        ? decimal.ToInt32(creditFails)
+                        : null,
+                    AverageGatherScore10 = average?.AverageGatherScore10 ?? average?.AverageGatherScore,
+                    AverageGatherScore4 = average?.AverageGatherScore4,
+                    UpdateDate = average?.UpdateDate
+                };
+            }).ToList();
+
+            return Ok(activeProgress);
+        }
+
         var list = rows.Select(x =>
         {
             var mandatoryCredits = x.MandatoryCredits ?? 0;

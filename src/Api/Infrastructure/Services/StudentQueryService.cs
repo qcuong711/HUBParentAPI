@@ -80,24 +80,27 @@ public class StudentQueryService : IStudentQueryService
             join major in _db.Ologies.AsNoTracking()
                 on program.OlogyID equals major.OlogyID into majorJoin
             from major in majorJoin.DefaultIfEmpty()
+            join parentMajor in _db.Ologies.AsNoTracking()
+                on major.ParentMajorID equals parentMajor.OlogyID into parentMajorJoin
+            from parentMajor in parentMajorJoin.DefaultIfEmpty()
             orderby studentProgram.UpdateDate descending, program.StudyProgramName
             select new StudentProgramDto
             {
                 StudentID = studentProgram.StudentID,
                 StudyProgramID = studentProgram.StudyProgramID,
                 StudyProgramName = program.StudyProgramName,
-                MajorID = program.OlogyID,
-                MajorName = major.OlogyName,
-                SpecializationID = studentProgram.SpecializationID == null
-                    || studentProgram.SpecializationID == "[NA]"
-                    || studentProgram.SpecializationID == "[N/A]"
-                    || studentProgram.SpecializationID.Trim() == ""
-                        ? null
-                        : studentProgram.SpecializationID,
-                SpecializationName = major.SpecializationName == null
-                    || major.SpecializationName.Trim() == ""
-                        ? null
-                        : major.SpecializationName,
+                MajorID = parentMajor != null && parentMajor.OlogyID != major.OlogyID
+                    ? parentMajor.OlogyID
+                    : program.OlogyID,
+                MajorName = parentMajor != null && parentMajor.OlogyID != major.OlogyID
+                    ? parentMajor.OlogyName
+                    : major.OlogyName,
+                SpecializationID = parentMajor != null && parentMajor.OlogyID != major.OlogyID
+                    ? major.OlogyID
+                    : null,
+                SpecializationName = parentMajor != null && parentMajor.OlogyID != major.OlogyID
+                    ? major.OlogyName
+                    : null,
                 ProgramType = studentProgram.Type,
                 StudyStatus = studentProgram.StudyStatus,
                 UpdateDate = studentProgram.UpdateDate
