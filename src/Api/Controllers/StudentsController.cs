@@ -1,4 +1,5 @@
 using Api.Application;
+using Api.Application.Dtos;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Api.Controllers;
@@ -30,6 +31,7 @@ public class StudentsController : ControllerBase
     /// Gets the latest study status and academic warning history.
     /// </summary>
     [HttpGet("study-status/{studentCode}")]
+    [ProducesResponseType(typeof(IReadOnlyList<StudentStudyStatusDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetStudyStatus(
         string studentCode,
         [FromQuery] string? yearStudy,
